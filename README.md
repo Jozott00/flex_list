@@ -16,7 +16,7 @@ dependencies:
   flex_list: <latest_version>
 ```
 
-In you library add the following import:
+In your library add the following import:
 
 ```dart
 import 'package:flex_list/flex_list.dart';
@@ -24,8 +24,8 @@ import 'package:flex_list/flex_list.dart';
 
 ## Usage
 
-The following ecample shows how use `FlexList`. Beside the `children` property, you can
-set `horizontalSpacing` and `verticalSpacing` to define the space between the elements.
+The following example shows how to use `FlexList`. Beside the `children` property, you can
+set `horizontalSpacing` and `verticalSpacing` to define the spacing between the elements.
 
 **Note:** Both spacing values are `10` by default.
 
@@ -66,8 +66,10 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
+### Rendering of above Example
+<img src="https://github.com/Jozott00/flex_list/blob/main/blob/media/example1.png?raw=true" alt="Example Rendering" width="400"/>
 
 ## Additional information
 
 This package was written because of the lack of such layout function. The package repository is
-maintained on (Github)[].
+maintained on [Github](https://github.com/Jozott00/flex_list).
