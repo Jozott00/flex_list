@@ -2,8 +2,8 @@ Provides a flexible list layout that acts like a combination of `Expand` widgets
 
 ## Features
 
-`FlexList` puts as many provided elements as possible in one line (like `Wrap`), but also extends
-the width of the elements by the remaining space per line. This means that each row is filled to the
+`FlexList` puts as many provided elements as possible in one row (like `Wrap`), but also extends the
+width of the elements by the remaining space per row. This means that each row is filled to the
 maximum width.
 
 ## Getting started
@@ -66,7 +66,9 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
+
 ### Rendering of above Example
+
 <img src="https://github.com/Jozott00/flex_list/blob/main/blob/media/example1.png?raw=true" alt="Example Rendering" width="400"/>
 
 ## Additional information
