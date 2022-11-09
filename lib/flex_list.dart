@@ -45,8 +45,8 @@ class RenderFlexList extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _FlexListParentData> {
   RenderFlexList(
       {List<RenderBox>? children,
-        double horizontalSpacing = 10.0,
-        double verticalSpacing = 10.0})
+      double horizontalSpacing = 10.0,
+      double verticalSpacing = 10.0})
       : _horizontalSpacing = horizontalSpacing,
         _verticalSpacing = verticalSpacing {
     addAll(children);
@@ -147,14 +147,14 @@ class RenderFlexList extends RenderBox
 
       while (child != null) {
         final _FlexListParentData childParentData =
-        child.parentData! as _FlexListParentData;
+            child.parentData! as _FlexListParentData;
 
         if (childParentData._rowIndex != i) {
           break;
         }
 
         final lastItemPadding =
-        itemNumber + 1 == row.childNumber && i != 0 ? horizontalSpacing : 0;
+            itemNumber + 1 == row.childNumber && i != 0 ? horizontalSpacing : 0;
         final finalChildWidth = childParentData._initSize.width +
             eachChildAvailableWidth +
             lastItemPadding;
@@ -204,7 +204,7 @@ class _FlexListParentData extends ContainerBoxParentData<RenderBox>
 class _RowMetrics {
   final int childNumber;
   final Size
-  contentRawSize; // where width is the some of all widths and height is the heighest element
+      contentRawSize; // where width is the some of all widths and height is the heighest element
 
   _RowMetrics(this.childNumber, this.contentRawSize);
 }
