@@ -1,8 +1,8 @@
 # Flex List
 
-![Pub Points](https://img.shields.io/pub/v/flex_list)
-![Pub Points](https://img.shields.io/pub/points/flex_list)
-![Pub Points](https://img.shields.io/pub/popularity/flex_list)
+[![Pub Points](https://img.shields.io/pub/v/flex_list)](https://pub.dev/packages/flex_list)
+[![Pub Points](https://img.shields.io/pub/points/flex_list)](https://pub.dev/packages/flex_list/score)
+[![Pub Points](https://img.shields.io/pub/popularity/flex_list)](https://pub.dev/packages/flex_list/score)
 ---
 
 Provides a flexible list layout that behaves as you would expect from `Expand` widgets within
