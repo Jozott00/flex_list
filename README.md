@@ -1,4 +1,12 @@
-Provides a flexible list layout that acts like a combination of `Expand` widgets in a `Wrap`.
+# Flex List
+
+![Pub Points](https://img.shields.io/pub/v/flex_list)
+![Pub Points](https://img.shields.io/pub/points/flex_list)
+![Pub Points](https://img.shields.io/pub/popularity/flex_list)
+---
+
+Provides a flexible list layout that behaves as you would expect from `Expand` widgets within
+a `Wrap`.
 
 ## Features
 
@@ -74,4 +82,5 @@ class MyApp extends StatelessWidget {
 ## Additional information
 
 This package was written because of the lack of such layout function. The package repository is
-maintained on [Github](https://github.com/Jozott00/flex_list).
+maintained on [Github](https://github.com/Jozott00/flex_list) and published
+on [pub.dev](https://pub.dev/packages/flex_list)

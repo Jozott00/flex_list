@@ -1,3 +1,7 @@
+## 1.0.0
+
+Add all necassery overrides, as well as examples.
+
 ## 0.0.1
 
 Initial FlexList Version. This version does work well, but some RenderBox methods are not
