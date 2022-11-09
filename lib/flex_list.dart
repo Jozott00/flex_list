@@ -3,15 +3,23 @@ library flex_list;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+/// Provides a layout widget that takes multiple childs.
+/// It behaves as you would expect Expand widgets to behave within a wrap.
+///
+/// Each child is placed next to the previous in the same row, if it has enough space.
+/// If there isn't enough space, it will get placed in the next row.
+/// The space in the previous row is now divided between the elements of the row.
+///
+/// Note, all elements used have to implement .getDryLayout() since this method is used
+/// to determine the sizes of the children in advance.
 class FlexList extends MultiChildRenderObjectWidget {
-  /// What you would expect if you could use Expanded within a Wrap.
+  /// Creates a flex list layout
   ///
-  /// Each child is placed next to the previous in the same row, if it has enough space.
-  /// If there isn't enough space, it will get placed in the next row.
-  /// The space in the previous row is now divided between the elements of the row.
+  /// By default [horizontalSpacing] and [verticalSpacing] are set to 10.
   ///
-  /// Note, all elements used have to implement .getDryLayout() since this method is used
-  /// to determine the sizes of the children in advance.
+  /// [children] are the items. All of them have to implement [computeDryLayout].
+  /// [horizontalSpacing] defines the spacing between items in same row.
+  /// [verticalSpacing] defines the spacing between row.
   FlexList({
     super.key,
     required List<Widget> children,
@@ -19,10 +27,10 @@ class FlexList extends MultiChildRenderObjectWidget {
     this.verticalSpacing = 10.0,
   }) : super(children: children);
 
-  /// Spacing between items in same row
+  /// Defines spacing between items in same row
   final double horizontalSpacing;
 
-  /// Spacing between rows
+  /// Defines spacing between rows
   final double verticalSpacing;
 
   @override
@@ -39,6 +47,16 @@ class FlexList extends MultiChildRenderObjectWidget {
   }
 }
 
+/// Displays its children in multiple rows and places as many children as possible
+/// in one row.
+///
+/// A [RenderFlexList] determines the dry layout of each child and collects information
+/// about how many rows are required. After obtaining all raw child sizes,
+/// each child is layed out with additional space (depending on the remaining space left per row)
+/// and is then positioned to it's correct location.
+///
+/// [horizontalSpacing] defines the spacing between items in same row.
+/// [verticalSpacing] defines the spacing between row.
 class RenderFlexList extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FlexListParentData>,
@@ -56,6 +74,8 @@ class RenderFlexList extends RenderBox
   double get horizontalSpacing => _horizontalSpacing;
   double _horizontalSpacing;
 
+  /// Sets the horizontal spacing and marks that
+  /// the [RenderBox] needs to get relayed out.
   set horizontalSpacing(double value) {
     if (_horizontalSpacing == value) {
       return;
@@ -68,6 +88,8 @@ class RenderFlexList extends RenderBox
   double get verticalSpacing => _verticalSpacing;
   double _verticalSpacing;
 
+  /// Sets the vertical spacing and marks that
+  /// the [RenderBox] needs to get relayed out.
   set verticalSpacing(double value) {
     if (_verticalSpacing == value) {
       return;
@@ -84,9 +106,73 @@ class RenderFlexList extends RenderBox
   }
 
   @override
+  double computeMaxIntrinsicWidth(double height) {
+    return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return computeDryLayout(BoxConstraints(maxHeight: height)).width;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return computeDryLayout(BoxConstraints(maxWidth: width)).height;
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    return defaultComputeDistanceToHighestActualBaseline(baseline);
+  }
+
+  @override
   Size computeDryLayout(BoxConstraints constraints) {
-    // TODO: Implement
-    return super.computeDryLayout(constraints);
+    return _computeDryLayout(constraints);
+  }
+
+  Size _computeDryLayout(BoxConstraints constraints) {
+    var height = 0.0;
+
+    final childConstraint = BoxConstraints(
+        minWidth: 0,
+        maxWidth: constraints.maxWidth,
+        minHeight: 0,
+        maxHeight: constraints.maxHeight);
+
+    var child = firstChild;
+    var rowWidth = 0.0;
+    var rowMaxHeight = 0.0;
+    var firstRowChild = true;
+    var firstRow = true;
+    while (child != null) {
+      final horizSpacing = firstRowChild ? 0 : horizontalSpacing;
+      final size = child.getDryLayout(childConstraint);
+      final parentData = child.parentData! as _FlexListParentData;
+
+      final neededWidth = size.width + horizSpacing;
+
+      if (constraints.maxWidth - rowWidth < neededWidth) {
+        // if there is not enough space left in current row
+        // add maxRowHeight + (potential) vericalSpacing to height
+        height += rowMaxHeight + (firstRow ? 0 : verticalSpacing);
+        // reset row with first new element
+        rowWidth = 0;
+        rowMaxHeight = 0.0;
+        firstRow = false;
+      }
+
+      rowWidth += neededWidth;
+      rowMaxHeight = rowMaxHeight > size.height ? rowMaxHeight : size.height;
+      child = parentData.nextSibling;
+      firstRowChild = false;
+    }
+
+    return Size(constraints.maxWidth, height);
   }
 
   @override
