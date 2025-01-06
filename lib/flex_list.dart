@@ -191,6 +191,7 @@ class RenderFlexList extends RenderBox
         maxHeight: constraints.maxHeight);
 
     var first = true;
+    var biggestWidth = 0.0;
     while (child != null) {
       final horizSpacing = first ? 0 : horizontalSpacing;
       final size = child.getDryLayout(childConstraint);
@@ -198,6 +199,9 @@ class RenderFlexList extends RenderBox
         .._initSize = size;
 
       final neededWidth = size.width + horizSpacing;
+      if (neededWidth > biggestWidth ) {
+        biggestWidth = neededWidth;
+      }
 
       if (constraints.maxWidth - rowWidth < neededWidth) {
         // add to row to rows
@@ -241,9 +245,16 @@ class RenderFlexList extends RenderBox
 
         final lastItemPadding =
             itemNumber + 1 == row.childNumber && i != 0 ? horizontalSpacing : 0;
-        final finalChildWidth = childParentData._initSize.width +
-            eachChildAvailableWidth +
-            lastItemPadding;
+
+        final double finalChildWidth;
+        final equalWidth = (constraints.maxWidth - (horizontalSpacing * (row.childNumber - 1)))/ row.childNumber;
+        if (equalWidth >= biggestWidth) {
+          finalChildWidth = equalWidth + lastItemPadding;
+        } else {
+          finalChildWidth = childParentData._initSize.width +
+              eachChildAvailableWidth +
+              lastItemPadding;
+        }
 
         var consts = constraints.tighten(width: finalChildWidth);
         child.layout(consts);
