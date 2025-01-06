@@ -245,8 +245,7 @@ class RenderFlexList extends RenderBox
             eachChildAvailableWidth +
             lastItemPadding;
 
-        var consts = BoxConstraints.expand(
-            width: finalChildWidth, height: childParentData._initSize.height);
+        var consts = constraints.tighten(width: finalChildWidth);
         child.layout(consts);
 
         childParentData.offset = Offset(offsetX, offsetY);
