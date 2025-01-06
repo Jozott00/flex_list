@@ -1,3 +1,7 @@
+## 1.0.1
+
+Remove children height enforcement.
+
 ## 1.0.0
 
 Add all necassery overrides, as well as examples.
