@@ -1,3 +1,7 @@
+## 1.1.0
+
+Make children have the same width when possible.
+
 ## 1.0.1
 
 Remove children height enforcement.
