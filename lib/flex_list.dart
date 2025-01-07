@@ -3,7 +3,7 @@ library flex_list;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Provides a layout widget that takes multiple childs.
+/// Provides a layout widget that takes multiple children.
 /// It behaves as you would expect Expand widgets to behave within a wrap.
 ///
 /// Each child is placed next to the previous in the same row, if it has enough space.
@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// Note, all elements used have to implement .getDryLayout() since this method is used
 /// to determine the sizes of the children in advance.
+///
+/// You can try to force all children to have the same width with [tryUniformWidth],
+/// but it will only be able to do it if there's enough space left.
 class FlexList extends MultiChildRenderObjectWidget {
   /// Creates a flex list layout
   ///
@@ -64,8 +67,9 @@ class FlexList extends MultiChildRenderObjectWidget {
 /// each child is layed out with additional space (depending on the remaining space left per row)
 /// and is then positioned to it's correct location.
 ///
-/// [horizontalSpacing] defines the spacing between items in same row.
-/// [verticalSpacing] defines the spacing between row.
+/// [horizontalSpacing] defines the spacing between items in the same row.
+/// [verticalSpacing] defines the spacing between each row.
+/// [tryUniformWidth] tries to force all children to have the same width.
 class RenderFlexList extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FlexListParentData>,
