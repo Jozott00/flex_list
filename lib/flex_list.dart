@@ -3,7 +3,7 @@ library flex_list;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// Provides a layout widget that takes multiple childs.
+/// Provides a layout widget that takes multiple children.
 /// It behaves as you would expect Expand widgets to behave within a wrap.
 ///
 /// Each child is placed next to the previous in the same row, if it has enough space.
@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// Note, all elements used have to implement .getDryLayout() since this method is used
 /// to determine the sizes of the children in advance.
+///
+/// You can try to force all children to have the same width with [tryUniformWidth],
+/// but it will only be able to do it if there's enough space left.
 class FlexList extends MultiChildRenderObjectWidget {
   /// Creates a flex list layout
   ///
@@ -20,11 +23,12 @@ class FlexList extends MultiChildRenderObjectWidget {
   /// [children] are the items. All of them have to implement [computeDryLayout].
   /// [horizontalSpacing] defines the spacing between items in same row.
   /// [verticalSpacing] defines the spacing between row.
-  FlexList({
+  const FlexList({
     super.key,
     required List<Widget> children,
     this.horizontalSpacing = 10.0,
     this.verticalSpacing = 10.0,
+    this.tryUniformWidth = false,
   }) : super(children: children);
 
   /// Defines spacing between items in same row
@@ -33,17 +37,25 @@ class FlexList extends MultiChildRenderObjectWidget {
   /// Defines spacing between rows
   final double verticalSpacing;
 
+  /// If `true`, attempts to give all children in each run equal widths.
+  /// Falls back to default layout if equal widths can't be achieved.
+  final bool tryUniformWidth;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderFlexList(
-        horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing);
+      horizontalSpacing: horizontalSpacing,
+      verticalSpacing: verticalSpacing,
+      tryUniformWidth: tryUniformWidth,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderFlexList renderObject) {
     renderObject
       ..horizontalSpacing = horizontalSpacing
-      ..verticalSpacing = verticalSpacing;
+      ..verticalSpacing = verticalSpacing
+      ..tryUniformWidth = tryUniformWidth;
   }
 }
 
@@ -55,18 +67,21 @@ class FlexList extends MultiChildRenderObjectWidget {
 /// each child is layed out with additional space (depending on the remaining space left per row)
 /// and is then positioned to it's correct location.
 ///
-/// [horizontalSpacing] defines the spacing between items in same row.
-/// [verticalSpacing] defines the spacing between row.
+/// [horizontalSpacing] defines the spacing between items in the same row.
+/// [verticalSpacing] defines the spacing between each row.
+/// [tryUniformWidth] tries to force all children to have the same width.
 class RenderFlexList extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FlexListParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _FlexListParentData> {
-  RenderFlexList(
-      {List<RenderBox>? children,
-      double horizontalSpacing = 10.0,
-      double verticalSpacing = 10.0})
-      : _horizontalSpacing = horizontalSpacing,
-        _verticalSpacing = verticalSpacing {
+  RenderFlexList({
+    List<RenderBox>? children,
+    double horizontalSpacing = 10.0,
+    double verticalSpacing = 10.0,
+    bool tryUniformWidth = false,
+  })  : _horizontalSpacing = horizontalSpacing,
+        _verticalSpacing = verticalSpacing,
+        _tryUniformWidth = tryUniformWidth {
     addAll(children);
   }
 
@@ -95,6 +110,21 @@ class RenderFlexList extends RenderBox
       return;
     }
     _verticalSpacing = value;
+    markNeedsLayout();
+  }
+
+  /// Changes the layout algorithm to try to enforce the same width to all children
+  /// inside a run.
+  bool get tryUniformWidth => _tryUniformWidth;
+  bool _tryUniformWidth;
+
+  /// Changes the layout algorithm to try to enforce the same width to all children
+  /// inside a run.
+  set tryUniformWidth(bool value) {
+    if (_tryUniformWidth == value) {
+      return;
+    }
+    _tryUniformWidth = value;
     markNeedsLayout();
   }
 
@@ -191,6 +221,7 @@ class RenderFlexList extends RenderBox
         maxHeight: constraints.maxHeight);
 
     var first = true;
+    var biggestWidth = 0.0;
     while (child != null) {
       final horizSpacing = first ? 0 : horizontalSpacing;
       final size = child.getDryLayout(childConstraint);
@@ -198,6 +229,9 @@ class RenderFlexList extends RenderBox
         .._initSize = size;
 
       final neededWidth = size.width + horizSpacing;
+      if (neededWidth > biggestWidth ) {
+        biggestWidth = neededWidth;
+      }
 
       if (constraints.maxWidth - rowWidth < neededWidth) {
         // add to row to rows
@@ -241,9 +275,16 @@ class RenderFlexList extends RenderBox
 
         final lastItemPadding =
             itemNumber + 1 == row.childNumber && i != 0 ? horizontalSpacing : 0;
-        final finalChildWidth = childParentData._initSize.width +
-            eachChildAvailableWidth +
-            lastItemPadding;
+
+        final double finalChildWidth;
+        final equalWidth = (constraints.maxWidth - (horizontalSpacing * (row.childNumber - 1)))/ row.childNumber;
+        if (tryUniformWidth && equalWidth >= biggestWidth) {
+          finalChildWidth = equalWidth + lastItemPadding;
+        } else {
+          finalChildWidth = childParentData._initSize.width +
+              eachChildAvailableWidth +
+              lastItemPadding;
+        }
 
         var consts = constraints.tighten(width: finalChildWidth);
         child.layout(consts);
