@@ -20,11 +20,12 @@ class FlexList extends MultiChildRenderObjectWidget {
   /// [children] are the items. All of them have to implement [computeDryLayout].
   /// [horizontalSpacing] defines the spacing between items in same row.
   /// [verticalSpacing] defines the spacing between row.
-  FlexList({
+  const FlexList({
     super.key,
     required List<Widget> children,
     this.horizontalSpacing = 10.0,
     this.verticalSpacing = 10.0,
+    this.tryEnforceSameWidth = false,
   }) : super(children: children);
 
   /// Defines spacing between items in same row
@@ -33,17 +34,25 @@ class FlexList extends MultiChildRenderObjectWidget {
   /// Defines spacing between rows
   final double verticalSpacing;
 
+  /// If `true`, attempts to give all children in each run equal widths.
+  /// Falls back to default layout if equal widths can't be achieved.
+  final bool tryEnforceSameWidth;
+
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderFlexList(
-        horizontalSpacing: horizontalSpacing, verticalSpacing: verticalSpacing);
+      horizontalSpacing: horizontalSpacing,
+      verticalSpacing: verticalSpacing,
+      tryEnforceSameWidth: tryEnforceSameWidth,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderFlexList renderObject) {
     renderObject
       ..horizontalSpacing = horizontalSpacing
-      ..verticalSpacing = verticalSpacing;
+      ..verticalSpacing = verticalSpacing
+      ..tryEnforceSameWidth = tryEnforceSameWidth;
   }
 }
 
@@ -61,12 +70,14 @@ class RenderFlexList extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _FlexListParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _FlexListParentData> {
-  RenderFlexList(
-      {List<RenderBox>? children,
-      double horizontalSpacing = 10.0,
-      double verticalSpacing = 10.0})
-      : _horizontalSpacing = horizontalSpacing,
-        _verticalSpacing = verticalSpacing {
+  RenderFlexList({
+    List<RenderBox>? children,
+    double horizontalSpacing = 10.0,
+    double verticalSpacing = 10.0,
+    bool tryEnforceSameWidth = false,
+  })  : _horizontalSpacing = horizontalSpacing,
+        _verticalSpacing = verticalSpacing,
+        _tryEnforceSameWidth = tryEnforceSameWidth {
     addAll(children);
   }
 
@@ -95,6 +106,21 @@ class RenderFlexList extends RenderBox
       return;
     }
     _verticalSpacing = value;
+    markNeedsLayout();
+  }
+
+  /// Changes the layout algorithm to try to enforce the same width to all children
+  /// inside a run.
+  bool get tryEnforceSameWidth => _tryEnforceSameWidth;
+  bool _tryEnforceSameWidth;
+
+  /// Changes the layout algorithm to try to enforce the same width to all children
+  /// inside a run.
+  set tryEnforceSameWidth(bool value) {
+    if (_tryEnforceSameWidth == value) {
+      return;
+    }
+    _tryEnforceSameWidth = value;
     markNeedsLayout();
   }
 
@@ -248,7 +274,7 @@ class RenderFlexList extends RenderBox
 
         final double finalChildWidth;
         final equalWidth = (constraints.maxWidth - (horizontalSpacing * (row.childNumber - 1)))/ row.childNumber;
-        if (equalWidth >= biggestWidth) {
+        if (tryEnforceSameWidth && equalWidth >= biggestWidth) {
           finalChildWidth = equalWidth + lastItemPadding;
         } else {
           finalChildWidth = childParentData._initSize.width +
