@@ -25,7 +25,7 @@ class FlexList extends MultiChildRenderObjectWidget {
     required List<Widget> children,
     this.horizontalSpacing = 10.0,
     this.verticalSpacing = 10.0,
-    this.tryEnforceSameWidth = false,
+    this.tryUniformWidth = false,
   }) : super(children: children);
 
   /// Defines spacing between items in same row
@@ -36,14 +36,14 @@ class FlexList extends MultiChildRenderObjectWidget {
 
   /// If `true`, attempts to give all children in each run equal widths.
   /// Falls back to default layout if equal widths can't be achieved.
-  final bool tryEnforceSameWidth;
+  final bool tryUniformWidth;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return RenderFlexList(
       horizontalSpacing: horizontalSpacing,
       verticalSpacing: verticalSpacing,
-      tryEnforceSameWidth: tryEnforceSameWidth,
+      tryUniformWidth: tryUniformWidth,
     );
   }
 
@@ -52,7 +52,7 @@ class FlexList extends MultiChildRenderObjectWidget {
     renderObject
       ..horizontalSpacing = horizontalSpacing
       ..verticalSpacing = verticalSpacing
-      ..tryEnforceSameWidth = tryEnforceSameWidth;
+      ..tryUniformWidth = tryUniformWidth;
   }
 }
 
@@ -74,10 +74,10 @@ class RenderFlexList extends RenderBox
     List<RenderBox>? children,
     double horizontalSpacing = 10.0,
     double verticalSpacing = 10.0,
-    bool tryEnforceSameWidth = false,
+    bool tryUniformWidth = false,
   })  : _horizontalSpacing = horizontalSpacing,
         _verticalSpacing = verticalSpacing,
-        _tryEnforceSameWidth = tryEnforceSameWidth {
+        _tryUniformWidth = tryUniformWidth {
     addAll(children);
   }
 
@@ -111,16 +111,16 @@ class RenderFlexList extends RenderBox
 
   /// Changes the layout algorithm to try to enforce the same width to all children
   /// inside a run.
-  bool get tryEnforceSameWidth => _tryEnforceSameWidth;
-  bool _tryEnforceSameWidth;
+  bool get tryUniformWidth => _tryUniformWidth;
+  bool _tryUniformWidth;
 
   /// Changes the layout algorithm to try to enforce the same width to all children
   /// inside a run.
-  set tryEnforceSameWidth(bool value) {
-    if (_tryEnforceSameWidth == value) {
+  set tryUniformWidth(bool value) {
+    if (_tryUniformWidth == value) {
       return;
     }
-    _tryEnforceSameWidth = value;
+    _tryUniformWidth = value;
     markNeedsLayout();
   }
 
@@ -274,7 +274,7 @@ class RenderFlexList extends RenderBox
 
         final double finalChildWidth;
         final equalWidth = (constraints.maxWidth - (horizontalSpacing * (row.childNumber - 1)))/ row.childNumber;
-        if (tryEnforceSameWidth && equalWidth >= biggestWidth) {
+        if (tryUniformWidth && equalWidth >= biggestWidth) {
           finalChildWidth = equalWidth + lastItemPadding;
         } else {
           finalChildWidth = childParentData._initSize.width +
