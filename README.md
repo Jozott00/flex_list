@@ -62,7 +62,7 @@ class MyApp extends StatelessWidget {
                       Container(
                         color: Theme
                             .of(context)
-                            .backgroundColor,
+                            .colorScheme.surfaceContainer,
                         padding: EdgeInsets.symmetric(
                             horizontal: 20 + 20 * (i % 4), vertical: 10),
                         child: Text("Item $i"),
