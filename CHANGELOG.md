@@ -1,3 +1,7 @@
+## 1.2.0
+
+Updates the example and makes flex_list compatible with Flutter 3.*
+
 ## 1.1.0
 
 Make children have the same width when possible.
